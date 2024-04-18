@@ -1,0 +1,57 @@
+info:
+  application:
+    name: REPLICATOR
+    datacenter: ADIP
+    description: Sistema de replicación de datos
+    version: 1.0.0
+    year: 2023
+  vendor:
+    name: Hacom S.A.C.
+    address: Av. Los Constructores 1250, La Molina 15012
+    city: Lima
+    country: Peru
+    phone: +51 995-864-234
+    email: hacom@hacom-tech.com
+    url: https://www.hacom-tech.com/
+  license: https://www.hacom-tech.com/licenses/LICENSE-Tech-1.0.html
+
+server:
+  port: 8088
+
+spring:
+  main:
+    allow-bean-definition-overriding: true
+  data:
+    mongodb:
+      authentication-database: pwsalertsystem
+      database: pwsalertsystem
+      host: 192.168.5.128
+      port: 27017
+      username: pwsuser
+      password: pwsuser
+  codec:
+    max-in-memory-size: 10MB
+
+management:
+  metrics:
+    enable:
+      jvm: false
+      tomcat: false
+    export:
+      prometheus:
+        enabled: true
+  info:
+    env:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,loggers,scheduledtasks,metrics,configprops,quartz,refresh
+    enabled-by-default: false
+  endpoint:
+    prometheus:
+      enabled: true
+    health:
+      enabled: true
+    info:
+      enabled: true
