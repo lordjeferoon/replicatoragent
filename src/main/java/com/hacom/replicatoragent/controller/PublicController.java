@@ -48,7 +48,7 @@ public class PublicController {
     
     public PublicController() {
     	//MongoDB
-    	this.database = conexion_mongodb("pwsuser","pwsuser","pwsalertsystem","192.168.5.128",27017);
+    	/*this.database = conexion_mongodb("pwsuser","pwsuser","pwsalertsystem","192.168.5.128",27017);
         this.database_r = conexion_mongodb("pwsuserv2","pwsuserv2","pwsalertsystemv2","192.168.5.128",27017);
     	
     	//RocksDB
@@ -61,7 +61,7 @@ public class PublicController {
         } catch (RocksDBException e) {
         	System.out.println("Error");
             e.printStackTrace();
-        }
+        }*/
     }
 
     @GetMapping(value = "/status")
