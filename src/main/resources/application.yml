@@ -4,7 +4,7 @@ info:
     datacenter: ADIP
     description: Sistema de replicación de datos
     version: 1.0.0
-    year: 2023
+    year: 2024
   vendor:
     name: Hacom S.A.C.
     address: Av. Los Constructores 1250, La Molina 15012
@@ -31,6 +31,16 @@ spring:
       password: pwsuser
   codec:
     max-in-memory-size: 10MB
+
+database-replic:
+  data:
+    mongodb:
+      authentication-database: pwsalertsystemv2
+      database: pwsalertsystemv2
+      host: 192.168.5.128
+      port: 27017
+      username: pwsuserv2
+      password: pwsuserv2
 
 management:
   metrics:

@@ -302,14 +302,4 @@ public class ReplicatorAgentApplication {
     	return actorSystem.actorOf(MyActor.props(databaseManager.getRocksDB(), databaseManager.getDatabase(), databaseManager.getDatabase_r()), "ActorPWSZipCodes");
     }
 
-	@Bean
-	public WebClient webClient() {
-		final int size = 100 * 1024 * 1024;
-		final ExchangeStrategies strategies = ExchangeStrategies.builder()
-				.codecs(codecs -> codecs.defaultCodecs().maxInMemorySize(size))
-				.build();
-		return WebClient.builder()
-				.exchangeStrategies(strategies)
-				.build();
-	}
 }
