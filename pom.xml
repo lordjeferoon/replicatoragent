@@ -130,6 +130,11 @@
 	        <version>2.17.0</version> <!-- Reemplaza esto con la versión más reciente -->
 	    </dependency>
 
+	    <dependency>
+	    	<groupId>com.apis</groupId>
+	    	<artifactId>Apis</artifactId>
+	    	<version>0.0.1-SNAPSHOT</version>
+	    </dependency>
 	</dependencies>
 
 	<build>

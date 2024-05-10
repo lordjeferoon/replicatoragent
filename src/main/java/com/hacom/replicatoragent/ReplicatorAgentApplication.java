@@ -2,12 +2,11 @@ package com.hacom.replicatoragent;
 
 import org.rocksdb.RocksDB;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
-import org.springframework.web.reactive.function.client.ExchangeStrategies;
-import org.springframework.web.reactive.function.client.WebClient;
 
 import com.hacom.replicatoragent.actor.MyActor;
 import com.hacom.replicatoragent.config.DatabaseManager;
@@ -20,9 +19,10 @@ import akka.actor.ActorSystem;
 public class ReplicatorAgentApplication {
 	
 	RocksDB rocksDB = null;
-    
     MongoDatabase database = null;
     MongoDatabase database_r = null;
+    @Value("${info.application.datacenter}")
+    String dataCenter = null;
 
 	public static void main(String[] args) {
 		ConfigurableApplicationContext context = SpringApplication.run(ReplicatorAgentApplication.class, args);
@@ -119,187 +119,187 @@ public class ReplicatorAgentApplication {
 
     @Bean
     public ActorRef ActorPWSAccount(ActorSystem actorSystem) {
-        return actorSystem.actorOf(MyActor.props(databaseManager.getRocksDB(), databaseManager.getDatabase(), databaseManager.getDatabase_r()), "ActorPWSAccount");
+        return actorSystem.actorOf(MyActor.props(databaseManager.getRocksDB(), databaseManager.getDatabase(), databaseManager.getDatabase_r(),dataCenter), "ActorPWSAccount");
     }
     
     @Bean
     public ActorRef ActorPWSAccountCBoundary01(ActorSystem actorSystem) {
-    	return actorSystem.actorOf(MyActor.props(databaseManager.getRocksDB(), databaseManager.getDatabase(), databaseManager.getDatabase_r()), "ActorPWSAccountCBoundary01");
+    	return actorSystem.actorOf(MyActor.props(databaseManager.getRocksDB(), databaseManager.getDatabase(), databaseManager.getDatabase_r(),dataCenter), "ActorPWSAccountCBoundary01");
     }
     
     @Bean
     public ActorRef ActorPWSAccountState(ActorSystem actorSystem) {
-    	return actorSystem.actorOf(MyActor.props(databaseManager.getRocksDB(), databaseManager.getDatabase(), databaseManager.getDatabase_r()), "ActorPWSAccountState");
+    	return actorSystem.actorOf(MyActor.props(databaseManager.getRocksDB(), databaseManager.getDatabase(), databaseManager.getDatabase_r(),dataCenter), "ActorPWSAccountState");
     }
     
     @Bean
     public ActorRef ActorPWSAlert(ActorSystem actorSystem) {
-    	return actorSystem.actorOf(MyActor.props(databaseManager.getRocksDB(), databaseManager.getDatabase(), databaseManager.getDatabase_r()), "ActorPWSAlert");
+    	return actorSystem.actorOf(MyActor.props(databaseManager.getRocksDB(), databaseManager.getDatabase(), databaseManager.getDatabase_r(),dataCenter), "ActorPWSAlert");
     }
     
     @Bean
     public ActorRef ActorPWSAlertBroadcastList(ActorSystem actorSystem) {
-    	return actorSystem.actorOf(MyActor.props(databaseManager.getRocksDB(), databaseManager.getDatabase(), databaseManager.getDatabase_r()), "ActorPWSAlertBroadcastList");
+    	return actorSystem.actorOf(MyActor.props(databaseManager.getRocksDB(), databaseManager.getDatabase(), databaseManager.getDatabase_r(),dataCenter), "ActorPWSAlertBroadcastList");
     }
     
     @Bean
     public ActorRef ActorPWSAlertCategory(ActorSystem actorSystem) {
-    	return actorSystem.actorOf(MyActor.props(databaseManager.getRocksDB(), databaseManager.getDatabase(), databaseManager.getDatabase_r()), "ActorPWSAlertCategory");
+    	return actorSystem.actorOf(MyActor.props(databaseManager.getRocksDB(), databaseManager.getDatabase(), databaseManager.getDatabase_r(),dataCenter), "ActorPWSAlertCategory");
     }
     
     @Bean
     public ActorRef ActorPWSAlertDescription(ActorSystem actorSystem) {
-    	return actorSystem.actorOf(MyActor.props(databaseManager.getRocksDB(), databaseManager.getDatabase(), databaseManager.getDatabase_r()), "ActorPWSAlertDescription");
+    	return actorSystem.actorOf(MyActor.props(databaseManager.getRocksDB(), databaseManager.getDatabase(), databaseManager.getDatabase_r(),dataCenter), "ActorPWSAlertDescription");
     }
     
     @Bean
     public ActorRef ActorPWSAlertInstruction(ActorSystem actorSystem) {
-    	return actorSystem.actorOf(MyActor.props(databaseManager.getRocksDB(), databaseManager.getDatabase(), databaseManager.getDatabase_r()), "ActorPWSAlertInstruction");
+    	return actorSystem.actorOf(MyActor.props(databaseManager.getRocksDB(), databaseManager.getDatabase(), databaseManager.getDatabase_r(),dataCenter), "ActorPWSAlertInstruction");
     }
     
     @Bean
     public ActorRef ActorPWSAlertReport(ActorSystem actorSystem) {
-    	return actorSystem.actorOf(MyActor.props(databaseManager.getRocksDB(), databaseManager.getDatabase(), databaseManager.getDatabase_r()), "ActorPWSAlertReport");
+    	return actorSystem.actorOf(MyActor.props(databaseManager.getRocksDB(), databaseManager.getDatabase(), databaseManager.getDatabase_r(),dataCenter), "ActorPWSAlertReport");
     }
     
     @Bean
     public ActorRef ActorPWSAlertStatus(ActorSystem actorSystem) {
-    	return actorSystem.actorOf(MyActor.props(databaseManager.getRocksDB(), databaseManager.getDatabase(), databaseManager.getDatabase_r()), "ActorPWSAlertStatus");
+    	return actorSystem.actorOf(MyActor.props(databaseManager.getRocksDB(), databaseManager.getDatabase(), databaseManager.getDatabase_r(),dataCenter), "ActorPWSAlertStatus");
     }
     
     @Bean
     public ActorRef ActorPWSAlertStatusGroupedLocation(ActorSystem actorSystem) {
-    	return actorSystem.actorOf(MyActor.props(databaseManager.getRocksDB(), databaseManager.getDatabase(), databaseManager.getDatabase_r()), "ActorPWSAlertStatusGroupedLocation");
+    	return actorSystem.actorOf(MyActor.props(databaseManager.getRocksDB(), databaseManager.getDatabase(), databaseManager.getDatabase_r(),dataCenter), "ActorPWSAlertStatusGroupedLocation");
     }
     
     @Bean
     public ActorRef ActorPWSAlertStatusOLD(ActorSystem actorSystem) {
-    	return actorSystem.actorOf(MyActor.props(databaseManager.getRocksDB(), databaseManager.getDatabase(), databaseManager.getDatabase_r()), "ActorPWSAlertStatusOLD");
+    	return actorSystem.actorOf(MyActor.props(databaseManager.getRocksDB(), databaseManager.getDatabase(), databaseManager.getDatabase_r(),dataCenter), "ActorPWSAlertStatusOLD");
     }
     
     @Bean
     public ActorRef ActorPWSAudit(ActorSystem actorSystem) {
-    	return actorSystem.actorOf(MyActor.props(databaseManager.getRocksDB(), databaseManager.getDatabase(), databaseManager.getDatabase_r()), "ActorPWSAudit");
+    	return actorSystem.actorOf(MyActor.props(databaseManager.getRocksDB(), databaseManager.getDatabase(), databaseManager.getDatabase_r(),dataCenter), "ActorPWSAudit");
     }
     
     @Bean
     public ActorRef ActorPWSBroadcastCenter(ActorSystem actorSystem) {
-    	return actorSystem.actorOf(MyActor.props(databaseManager.getRocksDB(), databaseManager.getDatabase(), databaseManager.getDatabase_r()), "ActorPWSBroadcastCenter");
+    	return actorSystem.actorOf(MyActor.props(databaseManager.getRocksDB(), databaseManager.getDatabase(), databaseManager.getDatabase_r(),dataCenter), "ActorPWSBroadcastCenter");
     }
     
     @Bean
     public ActorRef ActorPWSBroadcastElement(ActorSystem actorSystem) {
-    	return actorSystem.actorOf(MyActor.props(databaseManager.getRocksDB(), databaseManager.getDatabase(), databaseManager.getDatabase_r()), "ActorPWSBroadcastElement");
+    	return actorSystem.actorOf(MyActor.props(databaseManager.getRocksDB(), databaseManager.getDatabase(), databaseManager.getDatabase_r(),dataCenter), "ActorPWSBroadcastElement");
     }
 
     @Bean
     public ActorRef ActorPWSCategoryEvent(ActorSystem actorSystem) {
-    	return actorSystem.actorOf(MyActor.props(databaseManager.getRocksDB(), databaseManager.getDatabase(), databaseManager.getDatabase_r()), "ActorPWSCategoryEvent");
+    	return actorSystem.actorOf(MyActor.props(databaseManager.getRocksDB(), databaseManager.getDatabase(), databaseManager.getDatabase_r(),dataCenter), "ActorPWSCategoryEvent");
     }
     
     @Bean
     public ActorRef ActorPWSCBoundary01(ActorSystem actorSystem) {
-    	return actorSystem.actorOf(MyActor.props(databaseManager.getRocksDB(), databaseManager.getDatabase(), databaseManager.getDatabase_r()), "ActorPWSCBoundary01");
+    	return actorSystem.actorOf(MyActor.props(databaseManager.getRocksDB(), databaseManager.getDatabase(), databaseManager.getDatabase_r(),dataCenter), "ActorPWSCBoundary01");
     }
     
     @Bean
     public ActorRef ActorPWSCustomConfig(ActorSystem actorSystem) {
-    	return actorSystem.actorOf(MyActor.props(databaseManager.getRocksDB(), databaseManager.getDatabase(), databaseManager.getDatabase_r()), "ActorPWSCustomConfig");
+    	return actorSystem.actorOf(MyActor.props(databaseManager.getRocksDB(), databaseManager.getDatabase(), databaseManager.getDatabase_r(),dataCenter), "ActorPWSCustomConfig");
     }
     
     @Bean
     public ActorRef ActorPWSEvent(ActorSystem actorSystem) {
-    	return actorSystem.actorOf(MyActor.props(databaseManager.getRocksDB(), databaseManager.getDatabase(), databaseManager.getDatabase_r()), "ActorPWSEvent");
+    	return actorSystem.actorOf(MyActor.props(databaseManager.getRocksDB(), databaseManager.getDatabase(), databaseManager.getDatabase_r(),dataCenter), "ActorPWSEvent");
     }
     
     @Bean
     public ActorRef ActorPWSEventAlert(ActorSystem actorSystem) {
-    	return actorSystem.actorOf(MyActor.props(databaseManager.getRocksDB(), databaseManager.getDatabase(), databaseManager.getDatabase_r()), "ActorPWSEventAlert");
+    	return actorSystem.actorOf(MyActor.props(databaseManager.getRocksDB(), databaseManager.getDatabase(), databaseManager.getDatabase_r(),dataCenter), "ActorPWSEventAlert");
     }
     
     @Bean
     public ActorRef ActorPWSEventSeverity(ActorSystem actorSystem) {
-    	return actorSystem.actorOf(MyActor.props(databaseManager.getRocksDB(), databaseManager.getDatabase(), databaseManager.getDatabase_r()), "ActorPWSEventSeverity");
+    	return actorSystem.actorOf(MyActor.props(databaseManager.getRocksDB(), databaseManager.getDatabase(), databaseManager.getDatabase_r(),dataCenter), "ActorPWSEventSeverity");
     }
     
     @Bean
     public ActorRef ActorPWSNotificationGroup(ActorSystem actorSystem) {
-    	return actorSystem.actorOf(MyActor.props(databaseManager.getRocksDB(), databaseManager.getDatabase(), databaseManager.getDatabase_r()), "ActorPWSNotificationGroup");
+    	return actorSystem.actorOf(MyActor.props(databaseManager.getRocksDB(), databaseManager.getDatabase(), databaseManager.getDatabase_r(),dataCenter), "ActorPWSNotificationGroup");
     }
     
     @Bean
     public ActorRef ActorPWSNotificationList(ActorSystem actorSystem) {
-    	return actorSystem.actorOf(MyActor.props(databaseManager.getRocksDB(), databaseManager.getDatabase(), databaseManager.getDatabase_r()), "ActorPWSNotificationList");
+    	return actorSystem.actorOf(MyActor.props(databaseManager.getRocksDB(), databaseManager.getDatabase(), databaseManager.getDatabase_r(),dataCenter), "ActorPWSNotificationList");
     }
     
     @Bean
     public ActorRef ActorPWSOperator(ActorSystem actorSystem) {
-    	return actorSystem.actorOf(MyActor.props(databaseManager.getRocksDB(), databaseManager.getDatabase(), databaseManager.getDatabase_r()), "ActorPWSOperator");
+    	return actorSystem.actorOf(MyActor.props(databaseManager.getRocksDB(), databaseManager.getDatabase(), databaseManager.getDatabase_r(),dataCenter), "ActorPWSOperator");
     }
     
     @Bean
     public ActorRef ActorPWSRefreshToken(ActorSystem actorSystem) {
-    	return actorSystem.actorOf(MyActor.props(databaseManager.getRocksDB(), databaseManager.getDatabase(), databaseManager.getDatabase_r()), "ActorPWSRefreshToken");
+    	return actorSystem.actorOf(MyActor.props(databaseManager.getRocksDB(), databaseManager.getDatabase(), databaseManager.getDatabase_r(),dataCenter), "ActorPWSRefreshToken");
     }
     
     @Bean
     public ActorRef ActorPWSRol(ActorSystem actorSystem) {
-    	return actorSystem.actorOf(MyActor.props(databaseManager.getRocksDB(), databaseManager.getDatabase(), databaseManager.getDatabase_r()), "ActorPWSRol");
+    	return actorSystem.actorOf(MyActor.props(databaseManager.getRocksDB(), databaseManager.getDatabase(), databaseManager.getDatabase_r(),dataCenter), "ActorPWSRol");
     }
 
     @Bean
     public ActorRef ActorPWSSenderIn(ActorSystem actorSystem) {
-    	return actorSystem.actorOf(MyActor.props(databaseManager.getRocksDB(), databaseManager.getDatabase(), databaseManager.getDatabase_r()), "ActorPWSSenderIn");
+    	return actorSystem.actorOf(MyActor.props(databaseManager.getRocksDB(), databaseManager.getDatabase(), databaseManager.getDatabase_r(),dataCenter), "ActorPWSSenderIn");
     }
     
     @Bean
     public ActorRef ActorPWSSenderInEndpoint(ActorSystem actorSystem) {
-    	return actorSystem.actorOf(MyActor.props(databaseManager.getRocksDB(), databaseManager.getDatabase(), databaseManager.getDatabase_r()), "ActorPWSSenderInEndpoint");
+    	return actorSystem.actorOf(MyActor.props(databaseManager.getRocksDB(), databaseManager.getDatabase(), databaseManager.getDatabase_r(),dataCenter), "ActorPWSSenderInEndpoint");
     }
     
     @Bean
     public ActorRef ActorPWSSenderUser(ActorSystem actorSystem) {
-    	return actorSystem.actorOf(MyActor.props(databaseManager.getRocksDB(), databaseManager.getDatabase(), databaseManager.getDatabase_r()), "ActorPWSSenderUser");
+    	return actorSystem.actorOf(MyActor.props(databaseManager.getRocksDB(), databaseManager.getDatabase(), databaseManager.getDatabase_r(),dataCenter), "ActorPWSSenderUser");
     }
     
     @Bean
     public ActorRef ActorPWSState(ActorSystem actorSystem) {
-    	return actorSystem.actorOf(MyActor.props(databaseManager.getRocksDB(), databaseManager.getDatabase(), databaseManager.getDatabase_r()), "ActorPWSState");
+    	return actorSystem.actorOf(MyActor.props(databaseManager.getRocksDB(), databaseManager.getDatabase(), databaseManager.getDatabase_r(),dataCenter), "ActorPWSState");
     }
     
     @Bean
     public ActorRef ActorPWSTemplateAlertCategoryEvents(ActorSystem actorSystem) {
-    	return actorSystem.actorOf(MyActor.props(databaseManager.getRocksDB(), databaseManager.getDatabase(), databaseManager.getDatabase_r()), "ActorPWSTemplateAlertCategoryEvents");
+    	return actorSystem.actorOf(MyActor.props(databaseManager.getRocksDB(), databaseManager.getDatabase(), databaseManager.getDatabase_r(),dataCenter), "ActorPWSTemplateAlertCategoryEvents");
     }
     
     @Bean
     public ActorRef ActorPWSTemplateCAP(ActorSystem actorSystem) {
-    	return actorSystem.actorOf(MyActor.props(databaseManager.getRocksDB(), databaseManager.getDatabase(), databaseManager.getDatabase_r()), "ActorPWSTemplateCAP");
+    	return actorSystem.actorOf(MyActor.props(databaseManager.getRocksDB(), databaseManager.getDatabase(), databaseManager.getDatabase_r(),dataCenter), "ActorPWSTemplateCAP");
     }
     
     @Bean
     public ActorRef ActorPWSTransmissionConfig(ActorSystem actorSystem) {
-    	return actorSystem.actorOf(MyActor.props(databaseManager.getRocksDB(), databaseManager.getDatabase(), databaseManager.getDatabase_r()), "ActorPWSTransmissionConfig");
+    	return actorSystem.actorOf(MyActor.props(databaseManager.getRocksDB(), databaseManager.getDatabase(), databaseManager.getDatabase_r(),dataCenter), "ActorPWSTransmissionConfig");
     }
     
     @Bean
     public ActorRef ActorPWSUser(ActorSystem actorSystem) {
-    	return actorSystem.actorOf(MyActor.props(databaseManager.getRocksDB(), databaseManager.getDatabase(), databaseManager.getDatabase_r()), "ActorPWSUser");
+    	return actorSystem.actorOf(MyActor.props(databaseManager.getRocksDB(), databaseManager.getDatabase(), databaseManager.getDatabase_r(),dataCenter), "ActorPWSUser");
     }
     
     @Bean
     public ActorRef ActorPWSUserAccountCBoundary01(ActorSystem actorSystem) {
-    	return actorSystem.actorOf(MyActor.props(databaseManager.getRocksDB(), databaseManager.getDatabase(), databaseManager.getDatabase_r()), "ActorPWSUserAccountCBoundary01");
+    	return actorSystem.actorOf(MyActor.props(databaseManager.getRocksDB(), databaseManager.getDatabase(), databaseManager.getDatabase_r(),dataCenter), "ActorPWSUserAccountCBoundary01");
     }
     
     @Bean
     public ActorRef ActorPWSUserAccountState(ActorSystem actorSystem) {
-    	return actorSystem.actorOf(MyActor.props(databaseManager.getRocksDB(), databaseManager.getDatabase(), databaseManager.getDatabase_r()), "ActorPWSUserAccountState");
+    	return actorSystem.actorOf(MyActor.props(databaseManager.getRocksDB(), databaseManager.getDatabase(), databaseManager.getDatabase_r(),dataCenter), "ActorPWSUserAccountState");
     }
     
     @Bean
     public ActorRef ActorPWSZipCodes(ActorSystem actorSystem) {
-    	return actorSystem.actorOf(MyActor.props(databaseManager.getRocksDB(), databaseManager.getDatabase(), databaseManager.getDatabase_r()), "ActorPWSZipCodes");
+    	return actorSystem.actorOf(MyActor.props(databaseManager.getRocksDB(), databaseManager.getDatabase(), databaseManager.getDatabase_r(),dataCenter), "ActorPWSZipCodes");
     }
 
 }
