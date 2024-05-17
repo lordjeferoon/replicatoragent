@@ -1,6 +1,11 @@
 package com.hacom.replicatoragent;
 
 import com.hacom.replicatoragent.repository.PWSAuditRepo;
+
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import org.rocksdb.RocksDB;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -12,6 +17,8 @@ import org.springframework.context.annotation.Bean;
 import com.hacom.replicatoragent.actor.MyActor;
 import com.hacom.replicatoragent.config.DatabaseManager;
 import com.mongodb.client.MongoDatabase;
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
@@ -41,7 +48,16 @@ public class ReplicatorAgentApplication {
 		
         ActorSystem actorSystem = context.getBean(ActorSystem.class);
         
-        ActorRef ActorPWSAccount = context.getBean("ActorPWSAccount",ActorRef.class);
+        // Obtener el mapa de actores del contexto de la aplicación
+        Map<Object, Object> actorMap = context.getBean("actorMap", Map.class);
+        
+        // Enviar mensajes a los actores
+        actorMap.forEach((beanName, actorRef) -> {
+            //actorSystem.log().info("Sending message to actor: {}", beanName);
+            ((ActorRef) actorRef).tell(beanName, ActorRef.noSender());
+        });
+        
+        /*ActorRef ActorPWSAccount = context.getBean("ActorPWSAccount",ActorRef.class);
         ActorRef ActorPWSAccountCBoundary01 = context.getBean("ActorPWSAccountCBoundary01",ActorRef.class);
         ActorRef ActorPWSAccountState = context.getBean("ActorPWSAccountState",ActorRef.class);
         ActorRef ActorPWSAlert = context.getBean("ActorPWSAlert",ActorRef.class);
@@ -115,7 +131,7 @@ public class ReplicatorAgentApplication {
         ActorPWSUser.tell("PWSUser", ActorRef.noSender());
         ActorPWSUserAccountCBoundary01.tell("PWSUserAccountCBoundary01", ActorRef.noSender());
         ActorPWSUserAccountState.tell("PWSUserAccountState", ActorRef.noSender());
-        ActorPWSZipCodes.tell("PWSZipCodes", ActorRef.noSender());
+        ActorPWSZipCodes.tell("PWSZipCodes", ActorRef.noSender());*/
 		
         //SpringApplication.run(ReplicatorAgentApplication.class, args);
 	}
@@ -126,10 +142,72 @@ public class ReplicatorAgentApplication {
 	
     @Bean
     public ActorSystem actorSystem() {
-        return ActorSystem.create("MyActorSystem");
+    	Config config = ConfigFactory.parseString(
+                "akka {\n" +
+                "  loglevel = " + "DEBUG" + "\n" +
+                "  stdout-loglevel = " + "DEBUG" + "\n" +
+                "  actor {\n" +
+                "    default-dispatcher {\n" +
+                "      fork-join-executor {\n" +
+                "        parallelism-min = " + "8" + "\n" +
+                "        parallelism-factor = " + "3.0" + "\n" +
+                "        parallelism-max = " + "64" + "\n" +
+                "      }\n" +
+                "    }\n" +
+                "  }\n" +
+                "}");
+    	
+        return ActorSystem.create("MyActorSystem",config);
+    }
+    
+    @Bean
+    public Map<Object, Object> actorMap(ActorSystem actorSystem) {
+        return Stream.of(
+        		"ActorPWSAccount",
+        		"ActorPWSAccountCBoundary01",
+        		"ActorPWSAccountState",
+        		"ActorPWSAlert",
+        		"ActorPWSAlertBroadcastList",
+        		"ActorPWSAlertCategory",
+        		"ActorPWSAlertDescription",
+        		"ActorPWSAlertInstruction",
+        		"ActorPWSAlertReport",
+        		"ActorPWSAlertStatus",
+        		"ActorPWSAlertStatusGroupedLocation",
+        		"ActorPWSAlertStatusOLD",
+        		"ActorPWSAudit",
+        		"ActorPWSBroadcastCenter",
+        		"ActorPWSBroadcastElement",
+        		"ActorPWSCategoryEvent",
+        		"ActorPWSCBoundary01",
+        		"ActorPWSCustomConfig",
+        		"ActorPWSEvent",
+        		"ActorPWSEventAlert",
+        		"ActorPWSEventSeverity",
+        		"ActorPWSNotificationGroup",
+        		"ActorPWSNotificationList",
+        		"ActorPWSOperator",
+        		"ActorPWSRefreshToken",
+        		"ActorPWSRol",
+        		"ActorPWSSenderIn",
+        		"ActorPWSSenderInEndpoint",
+        		"ActorPWSSenderUser",
+        		"ActorPWSState",
+        		"ActorPWSTemplateAlertCategoryEvents",
+        		"ActorPWSTemplateCAP",
+        		"ActorPWSTransmissionConfig",
+        		"ActorPWSUser",
+        		"ActorPWSUserAccountCBoundary01",
+        		"ActorPWSUserAccountState",
+        		"ActorPWSZipCodes"
+            )
+            .collect(Collectors.toMap(
+                beanName -> beanName,
+                beanName -> actorSystem.actorOf(MyActor.props(audits, databaseManager.getRocksDB(), databaseManager.getDatabase(), databaseManager.getDatabase_r(),dataCenter, module, utcZoneId ), beanName)
+            ));
     }
 
-    @Bean
+    /*@Bean
     public ActorRef ActorPWSAccount(ActorSystem actorSystem) {
         return actorSystem.actorOf(MyActor.props(audits, databaseManager.getRocksDB(), databaseManager.getDatabase(), databaseManager.getDatabase_r(),dataCenter, module, utcZoneId ), "ActorPWSAccount");
     }
@@ -312,6 +390,6 @@ public class ReplicatorAgentApplication {
     @Bean
     public ActorRef ActorPWSZipCodes(ActorSystem actorSystem) {
     	return actorSystem.actorOf(MyActor.props(audits, databaseManager.getRocksDB(), databaseManager.getDatabase(), databaseManager.getDatabase_r(),dataCenter, module, utcZoneId ), "ActorPWSZipCodes");
-    }
+    }*/
 
 }
