@@ -1,0 +1,7 @@
+rules:
+  - pattern: ".*"
+
+whitelistObjectNames:
+  - "java.lang:type=OperatingSystem"
+  - "java.lang:type=Threading"
+  - "java.lang:type=Memory"

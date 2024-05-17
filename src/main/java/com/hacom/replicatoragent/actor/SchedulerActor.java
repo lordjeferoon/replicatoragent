@@ -83,6 +83,7 @@ public class SchedulerActor extends AbstractActor {
 		    String key = new String(keyBytes);
 		    //String value = new String(valueBytes);
 		    
+		    String process = "";
 		    String operation = changeStreamDocument.get("operation").toString();
 		    String name_collection = changeStreamDocument.get("collection").toString();
 		    BsonValue _id = new BsonString(changeStreamDocument.get("id").toString());
@@ -90,12 +91,20 @@ public class SchedulerActor extends AbstractActor {
 		    MongoCollection<Document> collection_r = this.database_r.getCollection(name_collection);
 		    
 		    if(operation.equals("insert")) {
-		    	Document doc = (Document) changeStreamDocument.get("value");
 		    	try {
-		    		collection_r.insertOne(doc);
-		    		this.rocksDB.delete(keyBytes);
+		    		process = changeStreamDocument.get("process").toString();
 		    	}catch(Exception e) {
-		    		System.out.println("Hubo un error al hacer el INSERT del registro RocksDB: "+key);
+		    		
+		    	}
+		    	
+		    	if(!process.equals("regularization")) {
+		    		Document doc = (Document) changeStreamDocument.get("value");
+			    	try {
+			    		collection_r.insertOne(doc);
+			    		this.rocksDB.delete(keyBytes);
+			    	}catch(Exception e) {
+			    		System.out.println("Hubo un error al hacer el INSERT del registro RocksDB: "+key);
+			    	}
 		    	}
 		    }else {
 		    	if(operation.equals("update")) {

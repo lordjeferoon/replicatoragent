@@ -2,13 +2,13 @@ package com.hacom.replicatoragent.config;
 
 import java.util.Arrays;
 
+import javax.annotation.PostConstruct;
+
 import org.rocksdb.Options;
 import org.rocksdb.RocksDB;
 import org.rocksdb.RocksDBException;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.stereotype.Component;
 
 import com.mongodb.MongoClientSettings;
 import com.mongodb.MongoCredential;
@@ -20,9 +20,9 @@ import com.mongodb.client.MongoDatabase;
 @Configuration
 public class DatabaseManager {
 
-	private final MongoDatabase database;
-    private final MongoDatabase database_r;
-    private final RocksDB rocksDB;
+	private MongoDatabase database;
+    private MongoDatabase database_r;
+    private RocksDB rocksDB;
 
     //Datos conexión a la BD
     @Value("${spring.data.mongodb.database}")
@@ -47,9 +47,16 @@ public class DatabaseManager {
     private String databaseHostReplic;
     @Value("${database-replic.data.mongodb.port}")
     private int databasePortReplic;
-
+    
     public DatabaseManager() {
-        System.out.printf(databaseUsername + " " + databasePassword + " " + databaseName + " " + databaseHost + " " + databasePort);
+        this.database = null; // inicialización temporal, será reemplazada por la lógica en @PostConstruct
+        this.database_r = null; // inicialización temporal, será reemplazada por la lógica en @PostConstruct
+        this.rocksDB = null; // inicialización temporal, será reemplazada por la lógica en @PostConstruct
+    }
+
+    
+    @PostConstruct
+    public void init() {
         // Configuración de MongoDB
         this.database = conexion_mongodb(databaseUsername, databasePassword, databaseName, databaseHost, databasePort);
         this.database_r = conexion_mongodb(databaseUsernameReplic, databasePasswordReplic, databaseNameReplic, databaseHostReplic, databasePortReplic);
