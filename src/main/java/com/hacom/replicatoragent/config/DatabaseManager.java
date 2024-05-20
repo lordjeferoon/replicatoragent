@@ -95,6 +95,11 @@ public class DatabaseManager {
     	        .credential(credential)
     	        .applyToClusterSettings(builder ->
     	                builder.hosts(Arrays.asList(new ServerAddress(ip, puerto))))
+    	        .applyToConnectionPoolSettings(builder -> {
+                    builder.maxSize(64); // Ajusta el tamaño máximo del pool de conexiones según sea necesario
+                    //builder.minSize(10); // Ajusta el tamaño mínimo del pool de conexiones según sea necesario
+                    //builder.maxWaitTime(1000); // Tiempo máximo de espera para obtener una conexión en milisegundos
+                })
     	        .build();
 
     	MongoClient mongoClient = MongoClients.create(settings);

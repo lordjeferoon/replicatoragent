@@ -21,6 +21,7 @@ import org.rocksdb.RocksDB;
 import org.rocksdb.RocksDBException;
 import org.rocksdb.RocksIterator;
 
+import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
@@ -51,6 +52,7 @@ public class MyActor extends AbstractActor {
         this.dataCenter = dataCenter;
 		this.module = module;
 		this.utcZoneId = utcZoneId;
+		getContext().getSystem().log().info("Actor {} initialized with collection: {}", getSelf().path().name(), database);
     }
     
     public MyActor() {
@@ -115,8 +117,6 @@ public class MyActor extends AbstractActor {
     }
     
     private void call_event(MongoCursor<ChangeStreamDocument<Document>> cursor, MongoCollection<Document> collection, MongoCollection<Document> collection_r) throws RocksDBException {
-    	//ObjectMapper objectMapper = new ObjectMapper();
-	    //ObjectNode json = objectMapper.createObjectNode();
 	    Map<String, Object> mapaDatos = new HashMap<>();
 	    
 	    ChangeStreamDocument<Document> changeStreamDocument = cursor.next();
@@ -126,17 +126,8 @@ public class MyActor extends AbstractActor {
 	    
 	    mapaDatos.put("operation", changeStreamDocument.getOperationType().getValue().toString());
 	    mapaDatos.put("collection", name_collection.toString());
-	    //json.put("operation", changeStreamDocument.getOperationType().getValue().toString());
-	    //json.put("collection", changeStreamDocument.getNamespace().getCollectionName().toString());
-	    
-	    /*try {
-        	json.put("id", changeStreamDocument.getDocumentKey().getObjectId("_id").getValue().toString());
-        }catch(Exception e) {
-        	json.put("id", changeStreamDocument.getDocumentKey().getString("_id").getValue());
-        }*/
 	    
 	    if (changeStreamDocument.getOperationType() == OperationType.INSERT || changeStreamDocument.getOperationType() == OperationType.REPLACE) {
-	    	//json.put("value", changeStreamDocument.getFullDocument().toJson());
 	        mapaDatos.put("id", changeStreamDocument.getDocumentKey().getObjectId("_id").getValue().toString());
 	        mapaDatos.put("value", changeStreamDocument.getFullDocument());
 	        
@@ -155,12 +146,17 @@ public class MyActor extends AbstractActor {
 		        }
 	        }
 	    } else if (changeStreamDocument.getOperationType() == OperationType.UPDATE) {
+	    	/*FindIterable<Document> documents = collection.find();
+    		for (Document document : documents) {
+    			collection_r.insertOne(document);
+                System.out.println("Documento insertado en la base de datos destino: " + document.toJson());
+            }*/
+    		
 	    	System.out.println("ID del documento actualizado: " + changeStreamDocument.getDocumentKey());
 	        System.out.println("Descripción de la actualización: " + changeStreamDocument.getUpdateDescription());
 	        
 	        mapaDatos.put("id", changeStreamDocument.getDocumentKey().getObjectId("_id").getValue().toString());
 
-	        //json.put("value", changeStreamDocument.getUpdateDescription().getUpdatedFields().toJson());
 	        mapaDatos.put("value", changeStreamDocument.getUpdateDescription().getUpdatedFields());
 	        
 	    	if(name_collection.equals("PWSCustomConfig")) {
@@ -326,14 +322,14 @@ public class MyActor extends AbstractActor {
     		    }
     		}
 
-			/*PWSAudit audit = PWSAudit.builder()
+			PWSAudit audit = PWSAudit.builder()
 					.username("System")
 					.module(this.module)
 					.action("update")
 					.description("Regularización de Alertas en " + this.dataCenter)
 					.eventTime(LocalDateTime.now(ZoneId.of(this.utcZoneId)))
 					.build();
-			audits.save(audit).subscribe();*/
+			audits.save(audit).subscribe();
     	}
     }
 	
