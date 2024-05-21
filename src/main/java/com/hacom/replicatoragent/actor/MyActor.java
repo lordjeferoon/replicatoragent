@@ -131,19 +131,18 @@ public class MyActor extends AbstractActor {
 	        mapaDatos.put("id", changeStreamDocument.getDocumentKey().getObjectId("_id").getValue().toString());
 	        mapaDatos.put("value", changeStreamDocument.getFullDocument());
 	        
-	        if(name_collection.equals("PWSAlert") && this.dataCenter.equals("ADIP")) {
+	        /*if(name_collection.equals("PWSAlert") && this.dataCenter.equals("ADIP")) {
 	        	mapaDatos.put("process", "regularization");
-		    	save_register(mapaDatos);
-	        }else {
-	        	System.out.println("Documento insertado o reemplazado: " + changeStreamDocument.getFullDocument());
-		        try {
-		        	//Guardar evento
-	    	        collection_r.insertOne(changeStreamDocument.getFullDocument());
-		        }catch (DuplicateKeyException e) {
-		        	System.out.println("Error: Clave duplicada al intentar insertar el documento con ID: "+ changeStreamDocument.getDocumentKey().getObjectId("_id").getValue().toString());
-		        }catch(Exception e) {
-		        	save_register(mapaDatos);
-		        }
+	        }*/
+	        
+        	System.out.println("Documento insertado o reemplazado: " + changeStreamDocument.getFullDocument());
+	        try {
+	        	//Guardar evento
+    	        collection_r.insertOne(changeStreamDocument.getFullDocument());
+	        }catch (DuplicateKeyException e) {
+	        	System.out.println("Error: Clave duplicada al intentar insertar el documento con ID: "+ changeStreamDocument.getDocumentKey().getObjectId("_id").getValue().toString());
+	        }catch(Exception e) {
+	        	save_register(mapaDatos);
 	        }
 	    } else if (changeStreamDocument.getOperationType() == OperationType.UPDATE) {
 	    	/*FindIterable<Document> documents = collection.find();
@@ -168,51 +167,14 @@ public class MyActor extends AbstractActor {
     	        BsonDocument updateDocumentBson = changeStreamDocument.getUpdateDescription().getUpdatedFields();
     	        Document filter = new Document("_id", changeStreamDocument.getDocumentKey().get("_id"));
     	        
-    	        // Obtener el documento de la colección de origen
-                Document documento_original = collection_r.find(filter).first();
-    	        
-                boolean actualizar = false;
-                if (documento_original != null) {
-                    for (String key : updateDocumentBson.keySet()) {
-                        BsonValue newValue = updateDocumentBson.get(key);
-                        Object oldValue = documento_original.get(key);
-                        
-                        // Convertir los valores a cadenas y luego comparar las cadenas
-                        String newValueString = newValue.toString();
-                        String oldValueString = (oldValue != null) ? oldValue.toString() : null;
-                        
-                        Pattern pattern = Pattern.compile("\\{\\w+='(.*?)'\\}");
-                        
-                        Matcher matcher = pattern.matcher(newValueString);
-                        
-                        if (matcher.find()) {
-                        	newValueString = matcher.group(1);
-                            
-                            if (!newValueString.equals(oldValueString)) {
-                                actualizar = true;
-                                break;
-                            }
-                        } else {
-                            System.out.println("No se encontró ningún valor entre comillas.");
-                        }
-                    }
-                } else {
-                    actualizar = true;
+                Document document = new Document();
+                for (String key : updateDocumentBson.keySet()) {
+                    BsonValue value = updateDocumentBson.get(key);
+                    document.append(key, value);
                 }
                 
-                if (actualizar) {
-                    Document document = new Document();
-                    for (String key : updateDocumentBson.keySet()) {
-                        BsonValue value = updateDocumentBson.get(key);
-                        document.append(key, value);
-                    }
-                    
-                    Document updateDocument = new Document("$set", document);
-                    collection_r.updateOne(filter, updateDocument);
-                }else {
-                	System.out.println("No se realizó ninguna actualización sobre el documento con ID: " + 
-                						changeStreamDocument.getDocumentKey().getObjectId("_id").getValue().toString() + " ya que sus elementos son iguales");
-                }
+                Document updateDocument = new Document("$set", document);
+                collection_r.updateOne(filter, updateDocument);
 	        }catch(Exception e) {
 	        	save_register(mapaDatos);
 	        }
@@ -239,6 +201,13 @@ public class MyActor extends AbstractActor {
     
     public void proceso_regularizacion_pwsalert(MongoCollection<Document> collection, MongoCollection<Document> collection_r) throws RocksDBException {
     	if(this.dataCenter.equals("ADIP")) {
+    		
+    		/*FindIterable<Document> documents = collection.find();
+    		for (Document document : documents) {
+    			collection_r.insertOne(document);
+                System.out.println("Documento insertado en la base de datos destino: " + document.toJson());
+            }
+    		
     		Set<String> identificadoresVistos = new HashSet<>();
 
     		List<String> clavesAEliminar = new ArrayList<>();
@@ -320,7 +289,7 @@ public class MyActor extends AbstractActor {
         		    }
         		    
     		    }
-    		}
+    		}*/
 
 			PWSAudit audit = PWSAudit.builder()
 					.username("System")
