@@ -229,14 +229,14 @@ public class MyActor extends AbstractActor {
                 System.out.println("Documento insertado en la base de datos destino: " + doc.toJson());	
 		    }
 
-			/*PWSAudit audit = PWSAudit.builder()
+			PWSAudit audit = PWSAudit.builder()
 					.username("System")
 					.module(this.module)
 					.action("update")
 					.description("Regularización de Alertas en " + this.dataCenter)
 					.eventTime(LocalDateTime.now(ZoneId.of(this.utcZoneId)))
 					.build();
-			audits.save(audit).subscribe();*/
+			audits.save(audit).subscribe();
     	}
     }
 	
