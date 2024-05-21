@@ -16,6 +16,7 @@ import org.bson.BsonDocument;
 import org.bson.BsonObjectId;
 import org.bson.BsonValue;
 import org.bson.Document;
+import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
 import org.rocksdb.RocksDB;
 import org.rocksdb.RocksDBException;
@@ -25,6 +26,7 @@ import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.changestream.ChangeStreamDocument;
 import com.mongodb.client.model.changestream.OperationType;
 import com.mongodb.client.result.DeleteResult;
@@ -131,19 +133,14 @@ public class MyActor extends AbstractActor {
 	        mapaDatos.put("id", changeStreamDocument.getDocumentKey().getObjectId("_id").getValue().toString());
 	        mapaDatos.put("value", changeStreamDocument.getFullDocument());
 	        
-	        if(name_collection.equals("PWSAlert") && this.dataCenter.equals("ADIP")) {
-	        	mapaDatos.put("process", "regularization");
-		    	save_register(mapaDatos);
-	        }else {
-	        	System.out.println("Documento insertado o reemplazado: " + changeStreamDocument.getFullDocument());
-		        try {
-		        	//Guardar evento
-	    	        collection_r.insertOne(changeStreamDocument.getFullDocument());
-		        }catch (DuplicateKeyException e) {
-		        	System.out.println("Error: Clave duplicada al intentar insertar el documento con ID: "+ changeStreamDocument.getDocumentKey().getObjectId("_id").getValue().toString());
-		        }catch(Exception e) {
-		        	save_register(mapaDatos);
-		        }
+        	System.out.println("Documento insertado o reemplazado: " + changeStreamDocument.getFullDocument());
+	        try {
+	        	//Guardar evento
+    	        collection_r.insertOne(changeStreamDocument.getFullDocument());
+	        }catch (DuplicateKeyException e) {
+	        	System.out.println("Error: Clave duplicada al intentar insertar el documento con ID: "+ changeStreamDocument.getDocumentKey().getObjectId("_id").getValue().toString());
+	        }catch(Exception e) {
+	        	save_register(mapaDatos);
 	        }
 	    } else if (changeStreamDocument.getOperationType() == OperationType.UPDATE) {
 	    	/*FindIterable<Document> documents = collection.find();
@@ -168,51 +165,14 @@ public class MyActor extends AbstractActor {
     	        BsonDocument updateDocumentBson = changeStreamDocument.getUpdateDescription().getUpdatedFields();
     	        Document filter = new Document("_id", changeStreamDocument.getDocumentKey().get("_id"));
     	        
-    	        // Obtener el documento de la colección de origen
-                Document documento_original = collection_r.find(filter).first();
-    	        
-                boolean actualizar = false;
-                if (documento_original != null) {
-                    for (String key : updateDocumentBson.keySet()) {
-                        BsonValue newValue = updateDocumentBson.get(key);
-                        Object oldValue = documento_original.get(key);
-                        
-                        // Convertir los valores a cadenas y luego comparar las cadenas
-                        String newValueString = newValue.toString();
-                        String oldValueString = (oldValue != null) ? oldValue.toString() : null;
-                        
-                        Pattern pattern = Pattern.compile("\\{\\w+='(.*?)'\\}");
-                        
-                        Matcher matcher = pattern.matcher(newValueString);
-                        
-                        if (matcher.find()) {
-                        	newValueString = matcher.group(1);
-                            
-                            if (!newValueString.equals(oldValueString)) {
-                                actualizar = true;
-                                break;
-                            }
-                        } else {
-                            System.out.println("No se encontró ningún valor entre comillas.");
-                        }
-                    }
-                } else {
-                    actualizar = true;
+                Document document = new Document();
+                for (String key : updateDocumentBson.keySet()) {
+                    BsonValue value = updateDocumentBson.get(key);
+                    document.append(key, value);
                 }
                 
-                if (actualizar) {
-                    Document document = new Document();
-                    for (String key : updateDocumentBson.keySet()) {
-                        BsonValue value = updateDocumentBson.get(key);
-                        document.append(key, value);
-                    }
-                    
-                    Document updateDocument = new Document("$set", document);
-                    collection_r.updateOne(filter, updateDocument);
-                }else {
-                	System.out.println("No se realizó ninguna actualización sobre el documento con ID: " + 
-                						changeStreamDocument.getDocumentKey().getObjectId("_id").getValue().toString() + " ya que sus elementos son iguales");
-                }
+                Document updateDocument = new Document("$set", document);
+                collection_r.updateOne(filter, updateDocument);
 	        }catch(Exception e) {
 	        	save_register(mapaDatos);
 	        }
@@ -237,90 +197,37 @@ public class MyActor extends AbstractActor {
 	    }
     }
     
-    public void proceso_regularizacion_pwsalert(MongoCollection<Document> collection, MongoCollection<Document> collection_r) throws RocksDBException {
+    public void proceso_regularizacion_pwsalert(MongoCollection<Document> collection, MongoCollection<Document> collection_r) {
     	if(this.dataCenter.equals("ADIP")) {
-    		Set<String> identificadoresVistos = new HashSet<>();
-
-    		List<String> clavesAEliminar = new ArrayList<>();
-
-    		RocksIterator iterator = this.rocksDB.newIterator();
-    		    
-    		for (iterator.seekToFirst(); iterator.isValid(); iterator.next()) {
-    		    byte[] keyBytes = iterator.key();
-    		    byte[] valueBytes = iterator.value();
-    		    
-    		    Map<String, Object> changeStreamDocument = deserializar(valueBytes);
-    		    
-    		    String key = new String(keyBytes);
-    		    String msgType = "";
-    		    String identifier = "";
-    		    String process = "";
-
-                try {
-                    process = changeStreamDocument.get("process").toString();
-                } catch (Exception e) {
-
-                }
-                if (process.equals("regularization")) {
-                	try {
-        		        msgType = ((Document) changeStreamDocument.get("value")).get("msgType").toString();
-        		        identifier = ((Document) changeStreamDocument.get("value")).get("identifier").toString();
-        		    } catch (Exception e) {
-        		        
-        		    }
-        		    
-        		    String claveUnica = msgType + "_" + identifier;
-
-        		    if (identificadoresVistos.contains(claveUnica)) {
-        		        clavesAEliminar.add(key);
-        		    } else { 
-        		        identificadoresVistos.add(claveUnica);
-        		    }
-                }
-    		    
-    		}
-
-    		for (String clave : clavesAEliminar) {
-    			this.rocksDB.delete(clave.getBytes());
-    		}
     		
-    		iterator = this.rocksDB.newIterator();
+    		Calendar calendar = Calendar.getInstance();
+			calendar.add(Calendar.HOUR_OF_DAY, -24);
+			Date last24Hours = calendar.getTime();
     		
-    		for (iterator.seekToFirst(); iterator.isValid(); iterator.next()) {
-    			byte[] keyBytes = iterator.key();
-    		    byte[] valueBytes = iterator.value();
-    		    
-    		    Map<String, Object> changeStreamDocument = deserializar(valueBytes);
-    		    
-    		    String msgType = "";
-    		    String identifier = "";
-    		    String process = "";
-    		    
-    		    try {
-                    process = changeStreamDocument.get("process").toString();
-                } catch (Exception e) {
-
-                }
-    		    
-    		    if (process.equals("regularization")) {
-    		    	try {
-        		        msgType = ((Document) changeStreamDocument.get("value")).get("msgType").toString();
-        		        identifier = ((Document) changeStreamDocument.get("value")).get("identifier").toString();
-        		    } catch (Exception e) {
-        		        
-        		    }
-        		    
-        		    Document filtro = new Document("msgType", msgType).append("identifier", identifier);
-        		    Document resultado = collection.find(filtro).first();
-
-        		    if (resultado != null) {
-        		    	collection_r.deleteOne(filtro);
-            		    collection_r.insertOne(resultado);
-            		    this.rocksDB.delete(keyBytes);
-        		    }
-        		    
-    		    }
-    		}
+    		Bson filter = Filters.and(
+			    Filters.gte("createTime", last24Hours)
+			);
+    		
+    		MongoCursor<Document> cursor = collection.find(filter).iterator();
+			
+		    while (cursor.hasNext()) {
+		    	Document doc = cursor.next();
+		    	Bson filter_r = Filters.and(
+				    Filters.eq("msgType", doc.getString("msgType")),
+				    Filters.eq("identifier", doc.getString("identifier"))
+				);
+		    	
+		    	MongoCursor<Document> cursor_r = collection_r.find(filter_r).iterator();
+		    	
+		    	while (cursor_r.hasNext()) {
+			        Document doc_r = cursor_r.next();
+			        Document filter_delete = new Document("_id", doc_r.get("_id"));
+	    	        collection_r.deleteOne(filter_delete);
+			    }
+		    	
+		    	collection_r.insertOne(doc);
+                System.out.println("Documento insertado en la base de datos destino: " + doc.toJson());	
+		    }
 
 			PWSAudit audit = PWSAudit.builder()
 					.username("System")
