@@ -55,7 +55,7 @@ public class ReplicatorAgentApplication {
         ActorRef ActorPWSAlertReport = context.getBean("ActorPWSAlertReport",ActorRef.class);
         ActorRef ActorPWSAlertStatus = context.getBean("ActorPWSAlertStatus",ActorRef.class);
         ActorRef ActorPWSAlertStatusGroupedLocation = context.getBean("ActorPWSAlertStatusGroupedLocation",ActorRef.class);
-        ActorRef ActorPWSAlertStatusOLD = context.getBean("ActorPWSAlertStatusOLD",ActorRef.class);
+        //ActorRef ActorPWSAlertStatusOLD = context.getBean("ActorPWSAlertStatusOLD",ActorRef.class);
         ActorRef ActorPWSAudit = context.getBean("ActorPWSAudit",ActorRef.class);
         ActorRef ActorPWSBroadcastCenter = context.getBean("ActorPWSBroadcastCenter",ActorRef.class);
         ActorRef ActorPWSBroadcastElement = context.getBean("ActorPWSBroadcastElement",ActorRef.class);
@@ -93,7 +93,7 @@ public class ReplicatorAgentApplication {
         ActorPWSAlertReport.tell("PWSAlertReport", ActorRef.noSender());
         ActorPWSAlertStatus.tell("PWSAlertStatus", ActorRef.noSender());
         ActorPWSAlertStatusGroupedLocation.tell("PWSAlertStatusGroupedLocation", ActorRef.noSender());
-        ActorPWSAlertStatusOLD.tell("PWSAlertStatusOLD", ActorRef.noSender());
+        //ActorPWSAlertStatusOLD.tell("PWSAlertStatusOLD", ActorRef.noSender());
         ActorPWSAudit.tell("PWSAudit", ActorRef.noSender());
         ActorPWSBroadcastCenter.tell("PWSBroadcastCenter", ActorRef.noSender());
         ActorPWSBroadcastElement.tell("PWSBroadcastElement", ActorRef.noSender());
@@ -202,10 +202,10 @@ public class ReplicatorAgentApplication {
     	return actorSystem.actorOf(MyActor.props(audits, databaseManager.getRocksDB(), databaseManager.getDatabase(), databaseManager.getDatabase_r(),dataCenter, module, utcZoneId), "ActorPWSAlertStatusGroupedLocation");
     }
     
-    @Bean
+    /*@Bean
     public ActorRef ActorPWSAlertStatusOLD(ActorSystem actorSystem) {
     	return actorSystem.actorOf(MyActor.props(audits, databaseManager.getRocksDB(), databaseManager.getDatabase(), databaseManager.getDatabase_r(),dataCenter, module, utcZoneId), "ActorPWSAlertStatusOLD");
-    }
+    }*/
     
     @Bean
     public ActorRef ActorPWSAudit(ActorSystem actorSystem) {
