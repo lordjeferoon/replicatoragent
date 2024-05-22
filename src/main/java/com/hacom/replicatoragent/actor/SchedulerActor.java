@@ -83,7 +83,6 @@ public class SchedulerActor extends AbstractActor {
 		    String key = new String(keyBytes);
 		    //String value = new String(valueBytes);
 		    
-		    String process = "";
 		    String operation = changeStreamDocument.get("operation").toString();
 		    String name_collection = changeStreamDocument.get("collection").toString();
 		    BsonValue _id = new BsonString(changeStreamDocument.get("id").toString());
@@ -91,20 +90,12 @@ public class SchedulerActor extends AbstractActor {
 		    MongoCollection<Document> collection_r = this.database_r.getCollection(name_collection);
 		    
 		    if(operation.equals("insert")) {
+	    		Document doc = (Document) changeStreamDocument.get("value");
 		    	try {
-		    		process = changeStreamDocument.get("process").toString();
+		    		collection_r.insertOne(doc);
+		    		this.rocksDB.delete(keyBytes);
 		    	}catch(Exception e) {
-		    		
-		    	}
-		    	
-		    	if(!process.equals("regularization")) {
-		    		Document doc = (Document) changeStreamDocument.get("value");
-			    	try {
-			    		collection_r.insertOne(doc);
-			    		this.rocksDB.delete(keyBytes);
-			    	}catch(Exception e) {
-			    		System.out.println("Hubo un error al hacer el INSERT del registro RocksDB: "+key);
-			    	}
+		    		System.out.println("Hubo un error al hacer el INSERT del registro RocksDB: "+key);
 		    	}
 		    }else {
 		    	if(operation.equals("update")) {
@@ -125,18 +116,32 @@ public class SchedulerActor extends AbstractActor {
 			    		System.out.println("Hubo un error al hacer el UPDATE del registro RocksDB: "+key);
 			    	}
 		    	}else {
-		    		try {
-			    		Document filter = new Document("_id", _id);
-		    	        DeleteResult deleteResult = collection_r.deleteOne(filter);
-		    	        
-		    	        if (deleteResult.getDeletedCount() > 0) {
-		    	        	this.rocksDB.delete(keyBytes);
-		    	        }else {
-		    	        	System.out.println("No se encontraron registros con el Key: " + key);
-		    	        }
-			    	}catch(Exception e) {
-			    		System.out.println("Hubo un error al hacer el DELETE del registro RocksDB: "+key);
-			    	}
+		    		if(operation.equals("delete")) {
+		    			try {
+				    		Document filter = new Document("_id", _id);
+			    	        DeleteResult deleteResult = collection_r.deleteOne(filter);
+			    	        
+			    	        if (deleteResult.getDeletedCount() > 0) {
+			    	        	this.rocksDB.delete(keyBytes);
+			    	        }else {
+			    	        	System.out.println("No se encontraron registros con el Key: " + key);
+			    	        }
+				    	}catch(Exception e) {
+				    		System.out.println("Hubo un error al hacer el DELETE del registro RocksDB: "+key);
+				    	}
+		    		}else {
+		    			if(operation.equals("replace")) {
+		    				Document doc = (Document) changeStreamDocument.get("value");
+		    		    	try {
+		    		    		Document filter = new Document("_id", doc.get("_id"));
+			    		    	collection_r.replaceOne(filter, doc);
+		    		    		this.rocksDB.delete(keyBytes);
+		    		    	}catch(Exception e) {
+		    		    		System.out.println("Hubo un error al hacer el REPLACE del registro RocksDB: "+key);
+		    		    	}
+		    			}
+		    		}
+		    		
 		    	}
 		    }
 		}

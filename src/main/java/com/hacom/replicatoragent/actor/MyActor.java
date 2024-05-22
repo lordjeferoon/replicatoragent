@@ -129,11 +129,11 @@ public class MyActor extends AbstractActor {
 	    mapaDatos.put("operation", changeStreamDocument.getOperationType().getValue().toString());
 	    mapaDatos.put("collection", name_collection.toString());
 	    
-	    if (changeStreamDocument.getOperationType() == OperationType.INSERT || changeStreamDocument.getOperationType() == OperationType.REPLACE) {
+	    if (changeStreamDocument.getOperationType() == OperationType.INSERT) {
 	        mapaDatos.put("id", changeStreamDocument.getDocumentKey().getObjectId("_id").getValue().toString());
 	        mapaDatos.put("value", changeStreamDocument.getFullDocument());
 	        
-        	System.out.println("Documento insertado o reemplazado: " + changeStreamDocument.getFullDocument());
+        	System.out.println("Documento insertado: " + changeStreamDocument.getFullDocument());
 	        try {
 	        	//Guardar evento
     	        collection_r.insertOne(changeStreamDocument.getFullDocument());
@@ -155,10 +155,6 @@ public class MyActor extends AbstractActor {
 	        mapaDatos.put("id", changeStreamDocument.getDocumentKey().getObjectId("_id").getValue().toString());
 
 	        mapaDatos.put("value", changeStreamDocument.getUpdateDescription().getUpdatedFields());
-	        
-	    	if(name_collection.equals("PWSCustomConfig")) {
-	    		proceso_regularizacion_pwsalert(this.database.getCollection("PWSAlert"),this.database_r.getCollection("PWSAlert"));
-	    	}
 	        
 	        try {
 	        	//Guardar evento
@@ -191,6 +187,26 @@ public class MyActor extends AbstractActor {
     	        } else {
     	            System.out.println("No se encontró ningún documento para eliminar.");
     	        }
+	        }catch(Exception e) {
+	        	save_register(mapaDatos);
+	        }
+	    }else if (changeStreamDocument.getOperationType() == OperationType.REPLACE) {
+	    	
+	    	System.out.println("Replace: " + changeStreamDocument.getFullDocument());
+	    	
+	    	mapaDatos.put("id", changeStreamDocument.getDocumentKey().getObjectId("_id").getValue().toString());
+	        mapaDatos.put("value", changeStreamDocument.getFullDocument());
+	    	
+	    	if(name_collection.equals("PWSCustomConfig")) {
+	    		proceso_regularizacion_pwsalert(this.database.getCollection("PWSAlert"),this.database_r.getCollection("PWSAlert"));
+	    	}
+	    	
+	    	try {
+	        	//Guardar evento
+	    		Document filter = new Document("_id", changeStreamDocument.getFullDocument().get("_id"));
+		    	collection_r.replaceOne(filter, changeStreamDocument.getFullDocument());
+	        }catch (DuplicateKeyException e) {
+	        	System.out.println("Error: Clave duplicada al intentar reemplazar el documento con ID: "+ changeStreamDocument.getDocumentKey().getObjectId("_id").getValue().toString());
 	        }catch(Exception e) {
 	        	save_register(mapaDatos);
 	        }
