@@ -1,6 +1,7 @@
 info:
   application:
     name: REPLICATOR
+    short-name: PWS-AR
     datacenter: ADIP
     description: Sistema de replicación de datos
     version: 1.0.0
@@ -31,6 +32,9 @@ spring:
       password: pwsuser
   codec:
     max-in-memory-size: 10MB
+
+customconfig:
+  utcZoneId: UTC-06:00
 
 database-replic:
   data:
