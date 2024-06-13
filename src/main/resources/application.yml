@@ -46,6 +46,9 @@ database-replic:
       username: pwsuserv2
       password: pwsuserv2
 
+rocksdb:
+  path: ./rocksdb_data
+
 management:
   metrics:
     enable:
